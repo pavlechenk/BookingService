@@ -14,6 +14,3 @@ class SHotel(BaseModel):
 
 class SHotelInfo(SHotel):
     rooms_left: int
-
-    model_config = ConfigDict(from_attributes=True)
-
