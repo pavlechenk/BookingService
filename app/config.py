@@ -18,11 +18,13 @@ class Settings(BaseSettings):
     TEST_DB_PASSWORD: str
     TEST_DB_NAME: str
 
+    REDIS_HOST: str
+    REDIS_PORT: int
+
     ALGORITHM: str
     SECRET_KEY: str
 
     ORIGINS: str
-    REDIS_URL: str
 
     EMAIL_HOST: str
     EMAIL_PORT: int
