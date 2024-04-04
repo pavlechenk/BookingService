@@ -34,24 +34,29 @@ async def lifespan(app: FastAPI):
     FastAPICache.init(RedisBackend(redis), prefix="cache")
     yield
 
+
 app = FastAPI(lifespan=lifespan)
 
 for router in [router_users, router_bookings, router_hotels, router_rooms, router_pages, router_images]:
     app.include_router(router)
 
-origins = settings.ORIGINS.split(';')
+origins = settings.ORIGINS.split(";")
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
     allow_methods=["GET", "POST", "OPTIONS", "DELETE", "PATCH", "PUT"],
-    allow_headers=["Content-Type", "Set-Cookie", "Access-Control-Allow-Headers",
-                   "Access-Control-Allow-Origin",
-                   "Authorization"],
+    allow_headers=[
+        "Content-Type",
+        "Set-Cookie",
+        "Access-Control-Allow-Headers",
+        "Access-Control-Allow-Origin",
+        "Authorization",
+    ],
 )
 
-app = VersionedFastAPI(app, version_format='{major}', prefix_format='/v{major}')
+app = VersionedFastAPI(app, version_format="{major}", prefix_format="/v{major}")
 
 sentry_sdk.init(
     dsn=settings.SENTRY_DNS,
@@ -64,7 +69,7 @@ admin = Admin(app, engine, authentication_backend=authentication_backend)
 for admin_view in [UsersAdmin, BookingsAdmin, HotelsAdmin, RoomsAdmin]:
     admin.add_view(admin_view)
 
-app.mount('/static', StaticFiles(directory='app/static'), 'static')
+app.mount("/static", StaticFiles(directory="app/static"), "static")
 
 
 @app.middleware("http")
@@ -72,7 +77,5 @@ async def add_process_time_header(request: Request, call_next):
     start_time = time.time()
     response = await call_next(request)
     process_time = time.time() - start_time
-    logger.info("Request handling time", extra={
-        "process_time": round(process_time, 4)
-    })
+    logger.info("Request handling time", extra={"process_time": round(process_time, 4)})
     return response
