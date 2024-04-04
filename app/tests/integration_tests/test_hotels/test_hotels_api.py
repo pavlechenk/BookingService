@@ -26,7 +26,7 @@ async def test_get_hotels_by_location(
     location, date_from, date_to, status_code, detail, async_client: AsyncClient
 ):
     response = await async_client.get(
-        "/hotels",
+        "/v1/hotels",
         params={
             "location": location,
             "date_from": date_from,

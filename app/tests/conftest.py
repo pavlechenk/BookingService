@@ -67,7 +67,7 @@ async def async_client():
 async def authenticated_async_client():
     async with AsyncClient(app=fastapi_app, base_url="http://test") as async_client:
         await async_client.post(
-            "/auth/login",
+            "/v1/auth/login",
             json={
                 "email": "test@test.com",
                 "password": "string",
