@@ -1,6 +1,6 @@
 from sqlalchemy import delete, insert, select
 from sqlalchemy.exc import SQLAlchemyError
-
+from app.logger import logger
 from app.database import async_session_maker
 
 
@@ -23,10 +23,18 @@ class BaseDAO:
 
     @classmethod
     async def add(cls, **data):
-        async with async_session_maker() as session:
-            query = insert(cls.model).values(**data).returning(cls.model)
-            await session.execute(query)
-            await session.commit()
+        try:
+            query = insert(cls.model).values(**data).returning(cls.model.id)
+            async with async_session_maker() as session:
+                result = await session.execute(query)
+                await session.commit()
+                return result.mappings().first()
+        except (SQLAlchemyError, Exception) as e:
+            msg = "Database Exc: " if isinstance(e, SQLAlchemyError) else "Unknown Exc: "
+            msg += "Cannot insert data into table"
+
+            logger.error(msg, extra={"table": cls.model.__tablename__}, exc_info=True)
+            return None
 
     @classmethod
     async def delete(cls, **filter_by):
@@ -42,4 +50,3 @@ class BaseDAO:
             result = await session.execute(query)
             await session.commit()
             return result.mappings().first()
-

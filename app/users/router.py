@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Response
 
-from app.exceptions import IncorrectEmailOrPasswordException, UserAlreadyExistsException
+from app.exceptions import IncorrectEmailOrPasswordException, UserAlreadyExistsException, CannotAddDataToDatabase
 from app.users.auth import authenticate_user, create_access_token, get_password_hash
 from app.users.dao import UserDAO
 from app.users.dependencies import get_current_user
@@ -20,7 +20,11 @@ async def register_user(user_data: SUserAuth):
         raise UserAlreadyExistsException
 
     hashed_password = get_password_hash(user_data.password)
-    await UserDAO.add(email=user_data.email, hashed_password=hashed_password)
+    new_user = await UserDAO.add(email=user_data.email, hashed_password=hashed_password)
+    if not new_user:
+        raise CannotAddDataToDatabase
+
+    return {"message": "Пользователь успешно создан"}
 
 
 @router.post("/login")
