@@ -1,11 +1,11 @@
-from datetime import date
+from datetime import date, datetime, timedelta
 
 from sqlalchemy import func, insert, select
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.bookings.models import Bookings
 from app.dao.base import BaseDAO
-from app.database import async_session_maker
+from app.database import async_session_maker, async_session_maker_nullpool
 from app.exceptions import RoomFullyBooked
 from app.hotels.rooms.models import Rooms
 from app.logger import logger
@@ -13,6 +13,18 @@ from app.logger import logger
 
 class BookingDAO(BaseDAO):
     model = Bookings
+
+    @classmethod
+    async def find_need_to_remind(cls, days: int):
+        tomorrow_date = (datetime.utcnow() + timedelta(days=days)).date()
+        async with async_session_maker_nullpool() as session:
+            query = (
+                select(Bookings)
+                .where(Bookings.date_from == tomorrow_date)
+            )
+
+            bookings = await session.execute(query)
+            return bookings.scalars().all()
 
     @classmethod
     async def find_all(cls, user_id: int):
