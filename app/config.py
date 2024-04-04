@@ -4,7 +4,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    MODE: Literal['DEV', 'TEST', 'PROD']
+    MODE: Literal["DEV", "TEST", "PROD"]
 
     DB_HOST: str
     DB_PORT: int
@@ -24,6 +24,7 @@ class Settings(BaseSettings):
     ALGORITHM: str
     SECRET_KEY: str
 
+
     ORIGINS: str
 
     EMAIL_HOST: str
@@ -38,7 +39,7 @@ class Settings(BaseSettings):
     @property
     def TEST_DATABASE_URL(self):
         return f"postgresql+asyncpg://{self.TEST_DB_USER}:{self.TEST_DB_PASSWORD}@{self.TEST_DB_HOST}:" \
-               f"{self.TEST_DB_PORT}{self.TEST_DB_NAME}"
+               f"{self.TEST_DB_PORT}/{self.TEST_DB_NAME}"
 
     model_config = SettingsConfigDict(env_file='.env')
 
