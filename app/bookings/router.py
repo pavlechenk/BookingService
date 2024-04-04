@@ -5,6 +5,7 @@ from app.bookings.services import BookingService
 from app.bookings.shemas import SNewBooking, SBookingInfo
 from app.users.dependencies import get_current_user
 from app.users.models import Users
+from fastapi_versioning import version
 
 router = APIRouter(
     prefix="/bookings",
@@ -13,11 +14,13 @@ router = APIRouter(
 
 
 @router.get("", description="Возвращает список всех бронирований пользователя")
+@version(1)
 async def get_bookings(user: Users = Depends(get_current_user)) -> list[SBookingInfo]:
     return await BookingDAO.find_all(user_id=user.id)
 
 
 @router.post("", description="Добавляет новую бронь", status_code=status.HTTP_201_CREATED)
+@version(2)
 async def add_booking(
     booking: SNewBooking,
     user: Users = Depends(get_current_user),
@@ -30,5 +33,6 @@ async def add_booking(
 @router.delete(
     "", description="Удаляет бронь пользователя", status_code=status.HTTP_204_NO_CONTENT
 )
+@version(1)
 async def delete_booking(booking_id: int, user: Users = Depends(get_current_user)):
     await BookingDAO.delete(id=booking_id, user_id=user.id)
