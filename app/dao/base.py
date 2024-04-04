@@ -1,4 +1,5 @@
 from sqlalchemy import delete, insert, select
+from sqlalchemy.exc import SQLAlchemyError
 
 from app.database import async_session_maker
 
@@ -33,3 +34,12 @@ class BaseDAO:
             query = delete(cls.model).filter_by(**filter_by)
             await session.execute(query)
             await session.commit()
+
+    @classmethod
+    async def add_bulk(cls, *data):
+        query = insert(cls.model).values(*data).returning(cls.model.id)
+        async with async_session_maker() as session:
+            result = await session.execute(query)
+            await session.commit()
+            return result.mappings().first()
+
