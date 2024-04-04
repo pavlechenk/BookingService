@@ -1,6 +1,7 @@
 import time
 from contextlib import asynccontextmanager
 
+import sentry_sdk
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -47,6 +48,12 @@ app.add_middleware(
     allow_headers=["Content-Type", "Set-Cookie", "Access-Control-Allow-Headers",
                    "Access-Control-Allow-Origin",
                    "Authorization"],
+)
+
+sentry_sdk.init(
+    dsn=settings.SENTRY_DNS,
+    traces_sample_rate=1.0,
+    profiles_sample_rate=1.0,
 )
 
 admin = Admin(app, engine, authentication_backend=authentication_backend)

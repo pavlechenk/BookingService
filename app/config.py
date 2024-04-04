@@ -22,6 +22,8 @@ class Settings(BaseSettings):
     REDIS_HOST: str
     REDIS_PORT: int
 
+    SENTRY_DNS: str
+
     ALGORITHM: str
     SECRET_KEY: str
 
