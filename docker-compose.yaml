@@ -3,6 +3,8 @@ services:
   db:
     image: postgres:16
     container_name: booking_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     env_file:
       - .env-non-dev
     ports:
@@ -76,3 +78,6 @@ services:
     depends_on:
       - redis
       - booking
+
+volumes:
+  postgres_data:
