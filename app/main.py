@@ -8,6 +8,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 from fastapi_versioning import VersionedFastAPI
+from prometheus_fastapi_instrumentator import Instrumentator
 from redis import asyncio as aioredis
 from sqladmin import Admin
 
@@ -57,6 +58,14 @@ app.add_middleware(
 )
 
 app = VersionedFastAPI(app, version_format="{major}", prefix_format="/v{major}")
+
+
+instrumentator = Instrumentator(
+    should_group_status_codes=False,
+    excluded_handlers=[".*admin.*", "/metrics"]
+)
+
+instrumentator.instrument(app).expose(app)
 
 sentry_sdk.init(
     dsn=settings.SENTRY_DNS,
