@@ -20,9 +20,12 @@ from app.database import engine
 from app.hotels.rooms.router import router as router_rooms
 from app.hotels.router import router as router_hotels
 from app.images.router import router as router_images
+from app.importer.router import router as router_importer
 from app.logger import logger
 from app.pages.router import router as router_pages
-from app.users.router import router as router_users
+from app.prometheus.router import router as router_prometheus
+from app.users.router import router_auth as router_auth
+from app.users.router import router_user as router_users
 
 
 @asynccontextmanager
@@ -38,7 +41,8 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-for router in [router_users, router_bookings, router_hotels, router_rooms, router_pages, router_images]:
+for router in [router_auth, router_users, router_bookings, router_hotels, router_rooms, router_pages, router_images,
+               router_importer, router_prometheus]:
     app.include_router(router)
 
 origins = settings.ORIGINS.split(";")
