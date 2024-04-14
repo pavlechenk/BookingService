@@ -7,13 +7,18 @@ from app.users.dependencies import get_current_user
 from app.users.models import Users
 from app.users.shemas import SUserAuth
 
-router = APIRouter(
+router_auth = APIRouter(
     prefix="/auth",
-    tags=["Auth & Пользователи"],
+    tags=["Auth"],
+)
+
+router_user = APIRouter(
+    prefix="/users",
+    tags=["Пользователи"],
 )
 
 
-@router.post("/register")
+@router_auth.post("/register")
 async def register_user(user_data: SUserAuth):
     existing_user = await UserDAO.find_one_or_none(email=user_data.email)
     if existing_user:
@@ -27,7 +32,7 @@ async def register_user(user_data: SUserAuth):
     return {"message": "Пользователь успешно создан"}
 
 
-@router.post("/login")
+@router_auth.post("/login")
 async def login_user(response: Response, user_data: SUserAuth):
     user = await authenticate_user(user_data.email, user_data.password)
     if not user:
@@ -38,16 +43,16 @@ async def login_user(response: Response, user_data: SUserAuth):
     return {"access_token": access_token}
 
 
-@router.post("/logout")
+@router_auth.post("/logout")
 async def logout_user(response: Response):
     response.delete_cookie("booking_access_token")
 
 
-@router.get("/me")
+@router_user.get("/me")
 async def read_users_me(current_user: Users = Depends(get_current_user)):
     return current_user
 
 
-@router.get("/all")
+@router_user.get("/all")
 async def read_users_all(current_user: Users = Depends(get_current_user)):
     return await UserDAO.find_all()
