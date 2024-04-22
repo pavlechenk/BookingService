@@ -10,9 +10,7 @@ if TYPE_CHECKING:
 
 
 class Hotels(Base):
-    __tablename__ = "hotels"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str]
     location: Mapped[str]
     services: Mapped[list[str]] = mapped_column(JSON)

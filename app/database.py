@@ -1,7 +1,7 @@
 from sqlalchemy import NullPool
 from sqlalchemy.ext.asyncio import (async_sessionmaker,
                                     create_async_engine)
-from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, declared_attr
 
 from app.config import settings
 
@@ -21,4 +21,10 @@ async_session_maker_nullpool = async_sessionmaker(engine_nullpool, expire_on_com
 
 
 class Base(DeclarativeBase):
-    pass
+    __abstract__ = True
+    
+    @declared_attr.directive
+    def __tablename__(cls) -> str:
+        return cls.__name__.lower()
+    
+    id: Mapped[int] = mapped_column(primary_key=True)
