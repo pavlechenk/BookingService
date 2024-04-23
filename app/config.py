@@ -2,10 +2,14 @@ from typing import Literal
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from app.shemas import JWTAuth
+
 
 class Settings(BaseSettings):
     MODE: Literal["DEV", "TEST", "PROD"]
     LOG_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
+    
+    JWT_TOKEN: JWTAuth = JWTAuth()
 
     DB_HOST: str
     DB_PORT: int
@@ -23,9 +27,6 @@ class Settings(BaseSettings):
     REDIS_PORT: int
 
     SENTRY_DNS: str
-
-    ALGORITHM: str
-    SECRET_KEY: str
 
     ORIGINS: str
 
