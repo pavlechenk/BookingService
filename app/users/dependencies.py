@@ -19,14 +19,22 @@ def get_token(request: Request):
     return token
 
 
-async def get_current_user(access_token: str = Depends(get_token)):
+async def get_payload_token(access_token: str = Depends(get_token)):
     try:
-        payload = jwt.decode(access_token, settings.SECRET_KEY, settings.ALGORITHM)
+        payload = jwt.decode(
+            access_token,
+            key=settings.JWT_TOKEN.public_key_path.read_text(),
+            algorithms=settings.JWT_TOKEN.algorithm
+        )
     except ExpiredSignatureError:
         raise TokenExpiredException
     except JWTError:
         raise IncorrectTokenFormatException
+    
+    return payload
 
+
+async def get_current_user(payload: dict = Depends(get_payload_token)):
     user_id: str = payload.get("sub")
     if not user_id:
         raise UserIsNotPresentException

@@ -18,17 +18,23 @@ def verify_password(plain_password, hashed_password) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
 
-def create_access_token(data: dict) -> str:
+def create_access_token(
+    data: dict,
+    expire_minutes: int = settings.JWT_TOKEN.access_token_expire_minutes
+) -> str:
     to_encode = data.copy()
-    expire = datetime.utcnow() + timedelta(minutes=30)
-    to_encode.update({"exp": expire})
+    now = datetime.utcnow()
+    expire = now + timedelta(minutes=expire_minutes)
+    to_encode.update({"exp": expire, "iat": now})
     encoded_jwt = jwt.encode(
-        to_encode, settings.SECRET_KEY, settings.ALGORITHM
+        to_encode, 
+        key=settings.JWT_TOKEN.private_key_path.read_text(),
+        algorithm=settings.JWT_TOKEN.algorithm
     )
     return encoded_jwt
 
 
-async def authenticate_user(email: EmailStr, password: str):
+async def authenticate_user(email: str, password: str):
     user = await UserDAO.find_one_or_none(email=email)
     if user and verify_password(password, user.hashed_password):
         return user
