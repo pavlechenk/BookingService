@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Response
 
-from app.exceptions import IncorrectEmailOrPasswordException, UserAlreadyExistsException, CannotAddDataToDatabase
+from app.exceptions import IncorrectEmailOrPasswordException, UserAlreadyExistsException, CannotAddDataToDatabase, UserNotEnoughPrivileges
 from app.users.auth import authenticate_user, create_access_token, get_password_hash
 from app.users.dao import UserDAO
 from app.users.dependencies import get_current_user
@@ -56,4 +56,7 @@ async def read_users_me(current_user: Users = Depends(get_current_user)):
 
 @router_user.get("/all", response_model=list[UserShema])
 async def read_users_all(current_user: Users = Depends(get_current_user)):
+    if not current_user.is_admin:
+        raise UserNotEnoughPrivileges
+    
     return await UserDAO.find_all()
