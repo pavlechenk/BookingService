@@ -5,7 +5,8 @@ from app.users.auth import authenticate_user, create_access_token, get_password_
 from app.users.dao import UserDAO
 from app.users.dependencies import get_current_user
 from app.users.models import Users
-from app.users.shemas import SUserAuth
+from app.users.shemas import SUserAuth, UserShema
+from fastapi import status
 
 router_auth = APIRouter(
     prefix="/auth",
@@ -18,7 +19,7 @@ router_user = APIRouter(
 )
 
 
-@router_auth.post("/register")
+@router_auth.post("/register", status_code=status.HTTP_201_CREATED)
 async def register_user(user_data: SUserAuth):
     existing_user = await UserDAO.find_one_or_none(email=user_data.email)
     if existing_user:
@@ -48,11 +49,11 @@ async def logout_user(response: Response):
     response.delete_cookie("booking_access_token")
 
 
-@router_user.get("/me")
+@router_user.get("/me", response_model=UserShema)
 async def read_users_me(current_user: Users = Depends(get_current_user)):
     return current_user
 
 
-@router_user.get("/all")
+@router_user.get("/all", response_model=list[UserShema])
 async def read_users_all(current_user: Users = Depends(get_current_user)):
     return await UserDAO.find_all()
