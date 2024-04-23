@@ -41,8 +41,17 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-for router in [router_auth, router_users, router_bookings, router_hotels, router_rooms, router_pages, router_images,
-               router_importer, router_prometheus]:
+for router in [
+    router_auth,
+    router_users,
+    router_bookings,
+    router_hotels,
+    router_rooms,
+    router_pages,
+    router_images,
+    router_importer,
+    router_prometheus,
+]:
     app.include_router(router)
 
 origins = settings.ORIGINS.split(";")
@@ -64,10 +73,7 @@ app.add_middleware(
 app = VersionedFastAPI(app, version_format="{major}", prefix_format="/v{major}")
 
 
-instrumentator = Instrumentator(
-    should_group_status_codes=False,
-    excluded_handlers=[".*admin.*", "/metrics"]
-)
+instrumentator = Instrumentator(should_group_status_codes=False, excluded_handlers=[".*admin.*", "/metrics"])
 
 instrumentator.instrument(app).expose(app)
 
