@@ -8,6 +8,10 @@ class BookingException(HTTPException):
     def __init__(self, detail: str = None):
         super().__init__(status_code=self.status_code, detail=detail or self.detail)
 
+class UserNotEnoughPrivileges(BookingException):
+    status_code = status.HTTP_403_FORBIDDEN
+    detail = "У пользователя недостаточно прав"
+
 
 class UserAlreadyExistsException(BookingException):
     status_code = status.HTTP_409_CONFLICT
