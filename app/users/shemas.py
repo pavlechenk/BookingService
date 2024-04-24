@@ -1,10 +1,17 @@
+from typing import Union
 from pydantic import BaseModel, EmailStr, ConfigDict
 
 
 class SUserAuth(BaseModel):
+    email_or_username: Union[EmailStr, str]
+    password: str
+    
+    
+class UserRegistration(BaseModel):
+    username: str
     email: EmailStr
     password: str
-
+    
 
 class UserShema(BaseModel):
     id: int
