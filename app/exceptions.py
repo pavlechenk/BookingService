@@ -40,6 +40,11 @@ class IncorrectTokenFormatException(BookingException):
 
 class UserIsNotPresentException(BookingException):
     status_code = status.HTTP_401_UNAUTHORIZED
+    
+    
+class UserIsNotActive(BookingException):
+    status_code = status.HTTP_403_FORBIDDEN
+    detail = "Ваш аккаунт заблокирован администратором"
 
 
 class RoomFullyBooked(BookingException):

@@ -6,9 +6,11 @@ from app.exceptions import (
     IncorrectTokenFormatException,
     TokenAbsentException,
     TokenExpiredException,
+    UserIsNotActive,
     UserIsNotPresentException,
 )
 from app.users.dao import UserDAO
+from app.users.models import Users
 
 
 def get_token(request: Request):
@@ -19,7 +21,7 @@ def get_token(request: Request):
     return token
 
 
-async def get_payload_token(access_token: str = Depends(get_token)):
+async def get_current_user(access_token: str = Depends(get_token)):
     try:
         payload = jwt.decode(
             access_token,
@@ -30,17 +32,16 @@ async def get_payload_token(access_token: str = Depends(get_token)):
         raise TokenExpiredException
     except JWTError:
         raise IncorrectTokenFormatException
-    
-    return payload
 
-
-async def get_current_user(payload: dict = Depends(get_payload_token)):
     user_id: str = payload.get("sub")
     if not user_id:
         raise UserIsNotPresentException
 
-    user = await UserDAO.find_one_or_none(id=int(user_id))
+    user: Users = await UserDAO.find_one_or_none(id=int(user_id))
     if not user:
         raise UserIsNotPresentException
+    
+    if not user.is_active:
+        raise UserIsNotActive
 
     return user
