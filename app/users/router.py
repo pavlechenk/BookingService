@@ -50,8 +50,9 @@ async def login_user(response: Response, user_data: SUserAuth):
 
 
 @router_auth.post("/logout")
-async def logout_user(response: Response):
+async def logout_user(response: Response, current_user: Users = Depends(get_current_user)):
     response.delete_cookie("booking_access_token")
+    return {"message": "Вы успешно вышли из аккаунта"}
 
 
 @router_user.get("/me", response_model=UserShema)
