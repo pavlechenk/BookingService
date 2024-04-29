@@ -11,6 +11,11 @@ from app.exceptions import (
 )
 from app.users.dao import UserDAO
 from app.users.models import Users
+from app.users.services import UserService
+
+
+def get_user_service():
+    return UserService(UserDAO)
 
 
 def get_token(request: Request):
