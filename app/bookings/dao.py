@@ -4,14 +4,14 @@ from sqlalchemy import func, insert, select
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.bookings.models import Bookings
-from app.dao.base import BaseDAO
+from app.dao.base import SQLAlchemyDAO
 from app.database import async_session_maker, async_session_maker_nullpool
 from app.exceptions import RoomFullyBooked
 from app.hotels.rooms.models import Rooms
 from app.logger import logger
 
 
-class BookingDAO(BaseDAO):
+class BookingDAO(SQLAlchemyDAO):
     model = Bookings
 
     @classmethod
