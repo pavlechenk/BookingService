@@ -7,6 +7,12 @@ class SUserAuth(BaseModel):
     email_or_username: Union[EmailStr, str]
     password: str
     
+    
+class UserChangePassword(BaseModel):
+    current_password: str
+    new_password: str
+    repeat_new_password: str
+    
 
 class UserBase(BaseModel):
     username: str

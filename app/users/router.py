@@ -1,12 +1,13 @@
+from typing import Union
 from fastapi import APIRouter, Depends, Response
 
-from app.exceptions import IncorrectEmailOrPasswordException, UserNotEnoughPrivileges
+from app.exceptions import CannotAddDataToDatabase, IncorrectEmailOrPasswordException, UserNotEnoughPrivileges
 from app.users.auth import authenticate_user, create_access_token
 from app.users.dao import UserDAO
 from app.users.dependencies import get_current_user, get_user_service
 from app.users.models import Users
 from app.users.services import UserService
-from app.users.shemas import SUserAuth, UserRegistration, UserShema, UserUpdate, UserUpdatePartial
+from app.users.shemas import SUserAuth, UserChangePassword, UserRegistration, UserShema, UserUpdate, UserUpdatePartial
 from fastapi import status
 
 router_auth = APIRouter(
@@ -43,6 +44,22 @@ async def login_user(response: Response, user_data: SUserAuth):
 async def logout_user(response: Response):
     response.delete_cookie("booking_access_token")
     return {"message": "Вы успешно вышли из аккаунта"}
+
+
+@router_auth.patch("/change_password")
+async def change_password(
+    user_data: UserChangePassword,
+    current_user: Users = Depends(get_current_user),
+    user_service: UserService = Depends(get_user_service)
+):
+    user_id: Union[int, None] = await user_service.change_password(current_user.id, user_data=user_data)
+    
+    if not user_id:
+        raise CannotAddDataToDatabase(detail="Не удалось изменить пароль пользователя")
+        
+    return {
+        "message": "Пароль был успешно изменен"
+    }
 
 
 @router_user.get("/me", response_model=UserShema)
