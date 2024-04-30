@@ -1,10 +1,10 @@
 from typing import Union
-
+from fastapi import status
 from app.dao.base import AbstractBaseDAO
-from app.exceptions import CannotAddDataToDatabase, UserAlreadyExistsException
-from app.users.auth import get_password_hash
+from app.exceptions import CannotAddDataToDatabase, IncorrectEmailOrPasswordException, UserAlreadyExistsException, UserIsNotPresentException, UserPasswordsDoNotMatch
+from app.users.auth import get_password_hash, verify_password
 from app.users.models import Users
-from app.users.shemas import UserRegistration
+from app.users.shemas import UserChangePassword, UserRegistration
 
 
 class UserService:
@@ -15,6 +15,27 @@ class UserService:
     async def get_users(self, **filter_by):
         users = await self.user_dao.find_all(**filter_by)
         return users
+    
+    
+    async def change_password(self, user_id: int, user_data: UserChangePassword):
+        user: Union[Users, None] = await self.user_dao.find_one_or_none(id=user_id)
+        
+        if not user:
+            raise UserIsNotPresentException
+        
+        if not verify_password(user_data.current_password, user.hashed_password):
+            raise IncorrectEmailOrPasswordException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Введен неправильный пароль"
+            )
+            
+        if user_data.new_password != user_data.repeat_new_password:
+            raise UserPasswordsDoNotMatch
+        
+        
+        hashed_password = get_password_hash(user_data.new_password)
+        return await self.user_dao.update(user_id=user_id, hashed_password=hashed_password)
+        
         
         
     async def create_user(self, user_data: UserRegistration):

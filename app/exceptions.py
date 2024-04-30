@@ -5,12 +5,17 @@ class BookingException(HTTPException):
     status_code = 500
     detail = ""
 
-    def __init__(self, detail: str = None):
-        super().__init__(status_code=self.status_code, detail=detail or self.detail)
+    def __init__(self, status_code = None, detail: str = None):
+        super().__init__(status_code=status_code or self.status_code, detail=detail or self.detail)
 
 class UserNotEnoughPrivileges(BookingException):
     status_code = status.HTTP_403_FORBIDDEN
     detail = "У пользователя недостаточно прав"
+    
+    
+class UserPasswordsDoNotMatch(BookingException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    detail = "Введенные пароли не совпадают"
 
 
 class UserAlreadyExistsException(BookingException):
