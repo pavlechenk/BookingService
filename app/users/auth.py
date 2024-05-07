@@ -19,21 +19,24 @@ def verify_password(plain_password, hashed_password) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
 
-def create_access_token(
-    data: dict,
-    expire_minutes: int = settings.JWT_TOKEN.access_token_expire_minutes
+def create_jwt(
+    token_type: str,
+    token_data: dict,
+    expire_timedelta: timedelta = timedelta(minutes=settings.JWT_TOKEN.access_token_expire_minutes)
 ) -> str:
-    to_encode = data.copy()
+    to_encode = token_data.copy()
     now = datetime.utcnow()
-    expire = now + timedelta(minutes=expire_minutes)
-    to_encode.update({"exp": expire, "iat": now})
+    expire = now + expire_timedelta
+    to_encode.update({"type": token_type, "exp": expire, "iat": now})
+    
     encoded_jwt = jwt.encode(
         to_encode, 
         key=settings.JWT_TOKEN.private_key_path.read_text(),
         algorithm=settings.JWT_TOKEN.algorithm
     )
+    
     return encoded_jwt
-
+    
 
 async def get_user(email_or_username: str):
     try:
@@ -45,6 +48,7 @@ async def get_user(email_or_username: str):
 
 async def authenticate_user(email_or_username: str, password: str):
     user: Users = await get_user(email_or_username)
+    
     if user and verify_password(password, user.hashed_password):
         return user
         
