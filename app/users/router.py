@@ -138,7 +138,8 @@ async def update_user_partial_me(
     status_code=status.HTTP_204_NO_CONTENT
 )
 async def delete_user(
+    response: Response,
     user_service: UserService = Depends(get_user_service),
     current_user: Users = Depends(get_current_user)
 ):
-    return await user_service.delete_user(user_id=current_user.id)
+    return await user_service.delete_user(response, user_id=current_user.id)

@@ -122,11 +122,14 @@ class UserService:
         }
     
     
-    async def delete_user(self, user_id: int):
+    async def delete_user(self, response: Response, user_id: int):
         user_id: Union[int, None] = await self.user_dao.delete(id=user_id)
         
         if not user_id:
             raise CannotAddDataToDatabase(detail="Не удалось удалить пользователя")
+        
+        response.delete_cookie("booking_access_token")
+        response.delete_cookie("booking_refresh_token")
 
         return {
             "message": "Пользователь успешно удален"
