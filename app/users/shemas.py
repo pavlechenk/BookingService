@@ -31,6 +31,12 @@ class UserUpdatePartial(UserBase):
     username: Union[str, None] = None
     email: Union[EmailStr, None] = None
     
+    
+class TokenInfo(BaseModel):
+    access_token: str
+    refresh_token: Union[str, None] = None
+    token_type: str = "cookie"
+    
 
 class UserShema(BaseModel):
     id: int
