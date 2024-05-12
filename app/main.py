@@ -70,18 +70,22 @@ app.add_middleware(
     ],
 )
 
-app = VersionedFastAPI(app, version_format="{major}", prefix_format="/v{major}")
+app = VersionedFastAPI(app, version_format="{major}", prefix_format="/v{major}", lifespan=lifespan)
 
+if settings.MODE == "TEST":
+    redis = aioredis.from_url(f"redis://{settings.REDIS_HOST}:{settings.REDIS_PORT}", encoding="utf8", decode_responses=True)
+    FastAPICache.init(RedisBackend(redis), prefix="cache")
 
 instrumentator = Instrumentator(should_group_status_codes=False, excluded_handlers=[".*admin.*", "/metrics"])
-
 instrumentator.instrument(app).expose(app)
 
-sentry_sdk.init(
-    dsn=settings.SENTRY_DNS,
-    traces_sample_rate=1.0,
-    profiles_sample_rate=1.0,
-)
+
+if settings.MODE != "TEST":
+    sentry_sdk.init(
+        dsn=settings.SENTRY_DNS,
+        traces_sample_rate=1.0,
+        profiles_sample_rate=1.0,
+    )
 
 admin = Admin(app, engine, authentication_backend=authentication_backend)
 
