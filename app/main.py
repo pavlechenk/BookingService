@@ -39,7 +39,10 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(
+    title="Бронирование Отелей",
+    root_path="/api"
+)
 
 for router in [
     router_auth,
