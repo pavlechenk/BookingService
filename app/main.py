@@ -28,21 +28,16 @@ from app.users.router import router_auth as router_auth
 from app.users.router import router_user as router_users
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    redis = aioredis.from_url(
-        f"redis://{settings.REDIS_HOST}:{settings.REDIS_PORT}",
-        encoding="utf8",
-        decode_responses=True,
-    )
-    FastAPICache.init(RedisBackend(redis), prefix="cache")
-    yield
-
-
 app = FastAPI(
     title="Бронирование Отелей",
     root_path="/api"
 )
+
+
+if settings.MODE == "TEST":
+    redis = aioredis.from_url(f"redis://{settings.REDIS_HOST}:{settings.REDIS_PORT}", encoding="utf8")
+    FastAPICache.init(RedisBackend(redis), prefix="cache")
+
 
 for router in [
     router_auth,
@@ -50,14 +45,15 @@ for router in [
     router_bookings,
     router_hotels,
     router_rooms,
-    router_pages,
     router_images,
     router_importer,
     router_prometheus,
 ]:
     app.include_router(router)
 
+
 origins = settings.ORIGINS.split(";")
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -73,11 +69,22 @@ app.add_middleware(
     ],
 )
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    redis = aioredis.from_url(
+        f"redis://{settings.REDIS_HOST}:{settings.REDIS_PORT}",
+        encoding="utf8",
+        decode_responses=True,
+    )
+    FastAPICache.init(RedisBackend(redis), prefix="cache")
+    yield
+
+
 app = VersionedFastAPI(app, version_format="{major}", prefix_format="/v{major}", lifespan=lifespan)
 
-if settings.MODE == "TEST":
-    redis = aioredis.from_url(f"redis://{settings.REDIS_HOST}:{settings.REDIS_PORT}", encoding="utf8", decode_responses=True)
-    FastAPICache.init(RedisBackend(redis), prefix="cache")
+app.include_router(router_pages)
+
 
 instrumentator = Instrumentator(should_group_status_codes=False, excluded_handlers=[".*admin.*", "/metrics"])
 instrumentator.instrument(app).expose(app)
@@ -90,10 +97,13 @@ if settings.MODE != "TEST":
         profiles_sample_rate=1.0,
     )
 
+
 admin = Admin(app, engine, authentication_backend=authentication_backend)
+
 
 for admin_view in [UsersAdmin, BookingsAdmin, HotelsAdmin, RoomsAdmin]:
     admin.add_view(admin_view)
+
 
 app.mount("/static", StaticFiles(directory="app/static"), "static")
 
