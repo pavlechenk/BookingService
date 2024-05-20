@@ -3,20 +3,21 @@ from httpx import AsyncClient
 
 
 @pytest.mark.parametrize(
-    "email,password,status_code",
+    "email,username,password,status_code",
     [
-        ("kot@pes.com", "kotopes", 200),
-        ("kot@pes.com", "kot0pes", 409),
-        ("pes@kpt.com", "pesokot", 200),
-        ("abcde", "pesokot", 422),
+        ("kot@pes.com", "kotpes", "kotopes", 201),
+        ("kot@pes.com", "kotpes", "kot0pes", 409),
+        ("pes@kpt.com", "peskot", "pesokot", 201),
+        ("abcde", "abcde", "pesokot", 422),
     ],
 )
-async def test_register_user(email, password, status_code, async_client: AsyncClient):
+async def test_register_user(email, username, password, status_code, async_client: AsyncClient):
     response = await async_client.post(
         "/v1/auth/register",
         json={
+            "username": username,
             "email": email,
-            "password": password,
+            "password": password
         },
     )
 
@@ -35,7 +36,7 @@ async def test_login_user(email, password, status_code, async_client: AsyncClien
     response = await async_client.post(
         "/v1/auth/login",
         json={
-            "email": email,
+            "email_or_username": email,
             "password": password,
         },
     )
