@@ -66,13 +66,15 @@ async def async_client():
 @pytest.fixture(scope="session")
 async def authenticated_async_client():
     async with AsyncClient(app=fastapi_app, base_url="http://test") as async_client:
-        await async_client.post(
-            "/v1/auth/login",
+        response = await async_client.post(
+            "/v2/auth/login",
             json={
-                "email": "test@test.com",
+                "email_or_username": "test@test.com",
                 "password": "string",
             },
         )
+        
+        assert response.status_code == 200
         assert async_client.cookies["booking_access_token"]
         yield async_client
 

@@ -1,10 +1,16 @@
 [
     {
         "email": "test@test.com",
-        "hashed_password": "$2b$12$gu3vNUrgnAjiFM505y2TTOITWEh4ang8FUTtcOJOyEI4FCivNYM1K"
-    },
-    {
+        "username": "testuser",
+        "hashed_password": "$2b$12$gu3vNUrgnAjiFM505y2TTOITWEh4ang8FUTtcOJOyEI4FCivNYM1K",
+        "is_active": true,
+        "is_admin": false
+      },
+      {
         "email": "Alex@gmail.com",
-        "hashed_password": "$2b$12$gu3vNUrgnAjiFM505y2TTOITWEh4ang8FUTtcOJOyEI4FCivNYM1K"
-    }
+        "username": "alex",
+        "hashed_password": "$2b$12$gu3vNUrgnAjiFM505y2TTOITWEh4ang8FUTtcOJOyEI4FCivNYM1K",
+        "is_active": true,
+        "is_admin": false
+      }
 ]
